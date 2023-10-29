@@ -22,14 +22,16 @@ const cards = [
   { name: 'spiderman', img: 'spiderman.jpg' },
   { name: 'superman', img: 'superman.jpg' },
   { name: 'the avengers', img: 'the-avengers.jpg' },
-  { name: 'thor', img: 'thor.jpg' }
+  { name: 'thor', img: 'thor.jpg' },
 ];
 
 const memoryGame = new MemoryGame(cards);
 
-window.addEventListener('load', (event) => {
+memoryGame.shuffleCards();
+
+window.addEventListener('load', event => {
   let html = '';
-  memoryGame.cards.forEach((pic) => {
+  memoryGame.cards.forEach(pic => {
     html += `
       <div class="card" data-card-name="${pic.name}">
         <div class="back" name="${pic.img}"></div>
@@ -41,11 +43,47 @@ window.addEventListener('load', (event) => {
   // Add all the divs to the HTML
   document.querySelector('#memory-board').innerHTML = html;
 
+  let pairsClicked = document.getElementById('pairs-clicked');
+  let pairsGuessed = document.getElementById('pairs-guessed');
+
+  let gameover = document.getElementById('game-over');
+  gameover.style.display = 'none';
+
   // Bind the click event of each element to a function
-  document.querySelectorAll('.card').forEach((card) => {
+  document.querySelectorAll('.card').forEach(card => {
     card.addEventListener('click', () => {
-      // TODO: write some code here
-      console.log(`Card clicked: ${card}`);
+      memoryGame.pickedCards.push(card);
+      card.classList.add('turned');
+
+      if (memoryGame.pickedCards.length === 2) {
+        const element0 = memoryGame.pickedCards[0];
+        const element1 = memoryGame.pickedCards[1];
+
+        const check = memoryGame.checkIfPair(
+          element0.getAttribute('data-card-name'),
+          element1.getAttribute('data-card-name')
+        );
+
+        if (!check) {
+          memoryGame.pickedCards.forEach(pickedcard => {
+            setTimeout(() => {
+              pickedcard.classList.remove('turned');
+            }, 500);
+          });
+        }
+
+        memoryGame.pickedCards = [];
+        pairsClicked.innerText = memoryGame.pairsClicked;
+        pairsGuessed.innerText = memoryGame.pairsGuessed;
+
+        if (memoryGame.checkIfFinished()) {
+          memoryGame.gameOver();
+        }
+      }
+
+      //if(memoryGame.checkIfFinished()){
+
+      //}
     });
   });
 });
